@@ -1,4 +1,4 @@
-export ANDROID_NDK=~/android-ndk-r10e
+export ANDROID_NDK=D:/android/android-ndk-r10e
 
 mkdir -p build_v7a && cd build_v7a
 cmake -DANDROID_ABI=armeabi-v7a -DCMAKE_TOOLCHAIN_FILE=../cmake/android.toolchain.cmake -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-clang3.6 -DANDROID_NATIVE_API_LEVEL=android-9 ../
@@ -14,4 +14,4 @@ cmake --build build_x86 --config Release
 mkdir -p plugin_lua53/Plugins/Android/libs/x86/
 cp build_x86/libxlua.so plugin_lua53/Plugins/Android/libs/x86/libxlua.so
 
-
+read -p "Press any key to continue." var
