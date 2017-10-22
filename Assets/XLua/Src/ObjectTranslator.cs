@@ -151,7 +151,7 @@ namespace XLua
             else
             {
 #if !GEN_CODE_MINIMIZE && !ENABLE_IL2CPP && (UNITY_EDITOR || XLUA_GENERAL) && !FORCE_REFLECTION
-                if (!DelegateBridge.Gen_Flag && !type.IsEnum && !typeof(Delegate).IsAssignableFrom(type) && Utils.IsPublic(type))
+                if (!DelegateBridge.Gen_Flag && !type.IsEnum() && !typeof(Delegate).IsAssignableFrom(type) && Utils.IsPublic(type))
                 {
                     Type wrap = ce.EmitTypeWrap(type);
                     MethodInfo method = wrap.GetMethod("__Register", BindingFlags.Static | BindingFlags.Public);
@@ -355,15 +355,19 @@ namespace XLua
             {
                 return null;
             }
-            
+
             // get by parameters
             MethodInfo delegateMethod = delegateType.GetMethod("Invoke");
             var methods = bridge.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-            for(int i = 0; i < methods.Length; i++)
+            for (int i = 0; i < methods.Length; i++)
             {
                 if (!methods[i].IsConstructor && Utils.IsParamsMatch(delegateMethod, methods[i]))
                 {
+#if !UNITY_WSA || UNITY_EDITOR
                     return Delegate.CreateDelegate(delegateType, bridge, methods[i]);
+#else
+                    return methods[i].CreateDelegate(delegateType, bridge); 
+#endif
                 }
             }
 
@@ -561,6 +565,9 @@ namespace XLua
             LuaAPI.lua_rawset(L, -3);
             LuaAPI.xlua_pushasciistring(L, "metatable_operation");
             LuaAPI.lua_pushstdcallcfunction(L, StaticLuaCallbacks.XLuaMetatableOperation);
+            LuaAPI.lua_rawset(L, -3);
+            LuaAPI.xlua_pushasciistring(L, "tofunction");
+            LuaAPI.lua_pushstdcallcfunction(L, StaticLuaCallbacks.ToFunction);
             LuaAPI.lua_rawset(L, -3);
             LuaAPI.lua_pop(L, 1);
 
@@ -904,7 +911,7 @@ namespace XLua
                 }
                 else
                 {
-                    if (type.IsEnum)
+                    if (type.IsEnum())
                     {
                         LuaAPI.xlua_pushasciistring(L, "__band");
                         LuaAPI.lua_pushstdcallcfunction(L, metaFunctions.EnumAndMeta);
