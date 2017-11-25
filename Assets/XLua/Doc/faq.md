@@ -8,6 +8,8 @@ xLua目前以zip包形式发布，在工程目录下解压即可。
 
 可以，但生成代码目录需要配置一下（默认放Assets\XLua\Gen目录），具体可以看《XLua的配置.doc》的GenPath配置介绍。
 
+更改目录要注意的是：生成代码和xLua核心代码必须在同一程序集。如果你要用热补丁特性，xLua核心代码必须在Assembly-CSharp程序集。
+
 ## lua源码只能以txt后缀？
 
 什么后缀都可以。
@@ -45,6 +47,12 @@ ios和osx需要在mac下编译。
 解决办法，确认XXX（类型名）加上CSharpCallLua后，清除代码后运行。
 
 如果编辑器下没问题，发布到手机报这错，表示你发布前没生成代码（执行“XLua/Generate Code”）。
+
+## unity5.5以上执行"XLua/Hotfix Inject In Editor"菜单会提示"WARNING: The runtime version supported by this application is unavailable."
+
+这是因为注入工具是用.net3.5编译，而unity5.5意思MonoBleedingEdge的mono环境并没3.5支持导致的，不过一般而言都向下兼容，目前为止也没发现该warning带来什么问题。
+
+可能有人发现定义INJECT_WITHOUT_TOOL用内嵌模式会没有该warning，但问题是这模式是调试问题用的，不建议使用，因为可能会有一些库冲突问题。
 
 ## hotfix下怎么触发一个event
 
@@ -207,6 +215,10 @@ print(dic:TryGetValue('a'))
 如果你是通过xlua.hotfix(class, method, func)注入到C#，则通过xlua.hotfix(class, method, nil)删除；
 
 要注意以上操作在Dispose之前完成。
+
+## 调用LuaEnv.Dispose崩溃
+
+很可能是这个Dispose操作是由lua那驱动执行，相当于在lua执行的过程中把lua虚拟机给释放了，改为只由C#执行即可。
 
 ## C#参数（或字段）类型是object时，传递整数默认是以long类型传递，如何指明其它类型？比如int
 
